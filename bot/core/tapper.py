@@ -214,7 +214,7 @@ class Tapper:
             logger.debug(f"get_profile_data | {self.session_name} | {error}")
             logger.error(f"{self.session_name} | ❗️Unknown error while getting Profile Data: {error}")
             await asyncio.sleep(delay=9)
-            continue
+            
 
     async def get_user_data(self, http_client: aiohttp.ClientSession):
         try:
