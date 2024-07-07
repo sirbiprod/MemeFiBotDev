@@ -192,7 +192,7 @@ class Tapper:
         except Exception as error:
             logger.error(f"{self.session_name} | ❗️Unknown error while getting Access Token: {error}")
             await asyncio.sleep(delay=9)
-            continue
+            #continue
 
     async def get_profile_data(self, http_client: aiohttp.ClientSession):
         try:
