@@ -6,7 +6,7 @@
 
 step 1. Add your ID and HASH in .env file
 
-step 2. Add your session (if you dont have folder "session" you need run start.bat or run.sh (or create folder))
+step 2. Add your session (if you dont have folder "sessions" you need run start.bat or run.sh (or create folder))
 
 step 3. Run run.sh or start.bat
 
