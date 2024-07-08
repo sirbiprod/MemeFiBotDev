@@ -22,6 +22,9 @@ from bot.exceptions import InvalidSession
 from .headers import headers
 from .agents import generate_random_user_agent
 
+from bot.exceptions import InvalidProtocol
+from datetime import datetime
+
 
 class Tapper:
     def __init__(self, tg_client: Client):
@@ -207,6 +210,11 @@ class Tapper:
             response.raise_for_status()
 
             response_json = await response.json()
+
+            #emerg stop
+            if 'errors' in response_json:
+                raise InvalidProtocol(f'get_profile_data msg: {response_json["errors"][0]["message"]}')
+
             profile_data = response_json['data']['telegramGameGetConfig']
 
             return profile_data
@@ -428,6 +436,11 @@ class Tapper:
             response = await http_client.post(url=self.GRAPHQL_URL, json=json_data)
             response.raise_for_status()
 
+            response_json = await response.json()
+
+            if 'errors' in response_json:
+                raise InvalidProtocol(f'upgrade_boost msg: {response_json["errors"][0]["message"]}')
+
             return True
         except Exception:
             return False
@@ -458,6 +471,10 @@ class Tapper:
             response.raise_for_status()
 
             response_json = await response.json()
+
+            if 'errors' in response_json:
+                raise InvalidProtocol(f'send_taps msg: {response_json["errors"][0]["message"]}')
+
             profile_data = response_json['data']['telegramGameProcessTapsBatch']
             return profile_data
         except Exception as error:
@@ -521,6 +538,9 @@ class Tapper:
                     taps = randint(a=settings.RANDOM_TAPS_COUNT[0], b=settings.RANDOM_TAPS_COUNT[1])
                     bot_config = await self.get_bot_config(http_client=http_client)
                     telegramMe = await self.get_user_data(http_client=http_client)
+
+                    available_energy = profile_data['currentEnergy']
+                    need_energy = taps * profile_data['weaponLevel']
 
  
                     #async def checker_clan_status(self, http_client):
@@ -615,9 +635,22 @@ class Tapper:
 
                     if active_turbo:
                         taps += randint(a=settings.ADD_TAPS_ON_TURBO[0], b=settings.ADD_TAPS_ON_TURBO[1])
+
+                        need_energy = 0
+
                         if time() - turbo_time > 10:
                             active_turbo = False
                             turbo_time = 0
+
+                    if need_energy > available_energy or available_energy - need_energy < settings.MIN_AVAILABLE_ENERGY:
+                        logger.warning(f"{self.session_name} | Need more energy ({available_energy}/{need_energy}, min: {settings.MIN_AVAILABLE_ENERGY}) for {taps} taps")
+
+                        sleep_between_clicks = randint(a=settings.SLEEP_BETWEEN_TAP[0], b=settings.SLEEP_BETWEEN_TAP[1])
+                        logger.info(f"Sleep {sleep_between_clicks}s")
+                        await asyncio.sleep(delay=sleep_between_clicks)
+                        # update profile data
+                        profile_data = await self.get_profile_data(http_client=http_client)
+                        continue
 
                     profile_data = await self.send_taps(http_client=http_client, nonce=nonce, taps=taps)
 
@@ -698,28 +731,66 @@ class Tapper:
                             continue
 
                         if settings.AUTO_UPGRADE_TAP is True and next_tap_level <= settings.MAX_TAP_LEVEL:
-                            status = await self.upgrade_boost(http_client=http_client,
-                                                              boost_type=UpgradableBoostType.TAP)
-                            if status is True:
-                                logger.success(f"{self.session_name} | 👉 Tap upgraded to {next_tap_level} lvl")
+                            # status = await self.upgrade_boost(http_client=http_client,
+                            #                                   boost_type=UpgradableBoostType.TAP)
+                            # if status is True:
+                            #     logger.success(f"{self.session_name} | 👉 Tap upgraded to {next_tap_level} lvl")
 
-                                await asyncio.sleep(delay=6)
+                            #     await asyncio.sleep(delay=6)
+                            need_balance = 1000 * (2 ** (next_tap_level - 1))
+
+                            if balance > need_balance:
+                                status = await self.upgrade_boost(http_client=http_client,
+                                                                  boost_type=UpgradableBoostType.TAP)
+                                if status is True:
+                                    logger.success(f"{self.session_name} | Tap upgraded to {next_tap_level} lvl")
+
+                                    await asyncio.sleep(delay=1)
+                            else:
+                                logger.debug(f"{self.session_name} | Need more gold for upgrade tap to {next_tap_level} lvl ({balance}/{need_balance})")
 
                         if settings.AUTO_UPGRADE_ENERGY is True and next_energy_level <= settings.MAX_ENERGY_LEVEL:
-                            status = await self.upgrade_boost(http_client=http_client,
-                                                              boost_type=UpgradableBoostType.ENERGY)
-                            if status is True:
-                                logger.success(f"{self.session_name} | 👉 Energy upgraded to {next_energy_level} lvl")
+                            # status = await self.upgrade_boost(http_client=http_client,
+                            #                                   boost_type=UpgradableBoostType.ENERGY)
+                            # if status is True:
+                            #     logger.success(f"{self.session_name} | 👉 Energy upgraded to {next_energy_level} lvl")
 
-                                await asyncio.sleep(delay=6)
+                            #     await asyncio.sleep(delay=6)
+
+                            need_balance = 1000 * (2 ** (next_energy_level - 1))
+                            if balance > need_balance:
+                                status = await self.upgrade_boost(http_client=http_client,
+                                                                  boost_type=UpgradableBoostType.ENERGY)
+                                if status is True:
+                                    logger.success(f"{self.session_name} | Energy upgraded to {next_energy_level} lvl")
+
+                                    await asyncio.sleep(delay=1)
+                            else:
+                                logger.warning(
+                                    f"{self.session_name} | Need more gold for upgrade energy to {next_energy_level} lvl ({balance}/{need_balance})")
+
 
                         if settings.AUTO_UPGRADE_CHARGE is True and next_charge_level <= settings.MAX_CHARGE_LEVEL:
-                            status = await self.upgrade_boost(http_client=http_client,
-                                                              boost_type=UpgradableBoostType.CHARGE)
-                            if status is True:
-                                logger.success(f"{self.session_name} | 👉 Charge upgraded to {next_charge_level} lvl")
+                            # status = await self.upgrade_boost(http_client=http_client,
+                            #                                   boost_type=UpgradableBoostType.CHARGE)
+                            # if status is True:
+                            #     logger.success(f"{self.session_name} | 👉 Charge upgraded to {next_charge_level} lvl")
 
-                                await asyncio.sleep(delay=6)
+                            #     await asyncio.sleep(delay=6)
+
+                            need_balance = 1000 * (2 ** (next_charge_level - 1))
+
+                            if balance > need_balance:
+                                status = await self.upgrade_boost(http_client=http_client,
+                                                                  boost_type=UpgradableBoostType.CHARGE)
+                                if status is True:
+                                    logger.success(f"{self.session_name} | Charge upgraded to {next_charge_level} lvl")
+
+                                    await asyncio.sleep(delay=1)
+                            else:
+                                logger.warning(
+                                    f"{self.session_name} | Need more gold for upgrade charge to {next_energy_level} lvl ({balance}/{need_balance})")
+
 
                         if available_energy < settings.MIN_AVAILABLE_ENERGY:
                             logger.info(f"{self.session_name} | 👉 Minimum energy reached: {available_energy}")
@@ -728,6 +799,13 @@ class Tapper:
                             await asyncio.sleep(delay=settings.SLEEP_BY_MIN_ENERGY)
 
                             continue
+
+                except InvalidProtocol as error:
+                    if settings.EMERGENCY_STOP is True:
+                        raise error
+                    else:
+                        logger.error(f"{self.session_name} | Warning! Invalid protocol detected in {error}")
+
 
                 except InvalidSession as error:
                     raise error
@@ -754,3 +832,5 @@ async def run_tapper(tg_client: Client, proxy: str | None):
         await Tapper(tg_client=tg_client).run(proxy=proxy)
     except InvalidSession:
         logger.error(f"{tg_client.name} | ❗️Invalid Session")
+    except InvalidProtocol as error:
+        logger.error(f"{tg_client.name} | ❗️Invalid protocol detected at {error}")
