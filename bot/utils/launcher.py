@@ -6,6 +6,7 @@ from itertools import cycle
 
 import platform
 import sys
+import distro
 
 from pyrogram import Client
 from better_proxy import Proxy
@@ -82,10 +83,10 @@ async def process() -> None:
         logger.debug(f"⚡️ Версия Python: {python_version}")
         logger.debug(f"⚡️ Операционная система: {system} {release}")
     elif system == "Linux":
-        distro = platform.linux_distribution()
+        distro_info = distro.linux_distribution()
         logger.debug(f"⚡️ Версия Python: {python_version}")
         logger.debug(f"⚡️ Операционная система: {system} {release}")
-        logger.debug(f"⚡️ Дистрибутив Linux: {distro[0]} {distro[1]}")
+        logger.debug(f"⚡️ Дистрибутив Linux: {distro_info[0]} {distro_info[1]}")
     else:
         logger.debug(f"⚡️ Версия Python: {python_version}")
 
