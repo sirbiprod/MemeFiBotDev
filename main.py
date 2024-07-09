@@ -29,6 +29,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    print_versions()
     with suppress(KeyboardInterrupt):
         asyncio.run(main())

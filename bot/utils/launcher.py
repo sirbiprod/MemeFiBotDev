@@ -4,6 +4,9 @@ import asyncio
 import argparse
 from itertools import cycle
 
+import platform
+import sys
+
 from pyrogram import Client
 from better_proxy import Proxy
 
@@ -67,6 +70,25 @@ async def get_tg_clients() -> list[Client]:
 
 
 async def process() -> None:
+
+    # Версия Python
+    python_version = sys.version
+
+    # Версия системы
+    system = platform.system()
+    release = platform.release()
+
+    if system == "Windows":
+        logger.debug(f"⚡️ Версия Python: {python_version}")
+        logger.debug(f"⚡️ Операционная система: {system} {release}")
+    elif system == "Linux":
+        distro = platform.linux_distribution()
+        logger.debug(f"⚡️ Версия Python: {python_version}")
+        logger.debug(f"⚡️ Операционная система: {system} {release}")
+        logger.debug(f"⚡️ Дистрибутив Linux: {distro[0]} {distro[1]}")
+    else:
+        logger.debug(f"⚡️ Версия Python: {python_version}")
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--action', type=int, help='Action to perform')
 
