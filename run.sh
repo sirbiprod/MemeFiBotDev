@@ -4,6 +4,12 @@
 #Проверка обновления репозитория
 git pull --allow-unrelated-histories #принудительное обновление
 
+#python3 --version
+
+#dmesg | grep "Linux version"
+
+
+
 # Проверка на наличие папки venv
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment..."
