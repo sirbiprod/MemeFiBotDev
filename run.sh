@@ -4,6 +4,8 @@
 #Проверка обновления репозитория
 git pull --allow-unrelated-histories #принудительное обновление
 
+#установка библиотек если такие появились
+pip install -r requirements.txt
 #python3 --version
 
 #dmesg | grep "Linux version"
