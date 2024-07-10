@@ -55,7 +55,7 @@ class Tapper:
             with open(user_agents_file_name, 'w') as user_agents:
                 json.dump(self.session_ug_dict, user_agents, indent=4)
 
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | User agent saved successfully")
+            logger.success(f"<light-yellow>{self.session_name}</light-yellow> | User agent saved successfully")
 
             return user_agent_str
 
