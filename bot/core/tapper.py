@@ -471,26 +471,40 @@ class Tapper:
             logger.error(f"{self.session_name} | ❗️ Unknown error when Tapping: {error}")
             await asyncio.sleep(delay=9)
 
-    async def check_proxy(self, http_client, proxy: Proxy) -> None:
+    async def check_proxy(self, http_client) -> None:
         try:
-            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5))
+            response = http_client.get(url='https://httpbin.org/ip', timeout=5)
             ip = (response.json()).get('origin')
             logger.info(f"{self.session_name} | Proxy IP: {ip}")
         except Exception as error:
-            logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
+            logger.error(f"{self.session_name} | Proxy: {self.tg_client.proxy['hostname']} | Error: {error}")
 
     async def run(self, proxy: str | None):
-        scraper = cloudscraper.create_scraper()
         access_token_created_time = 0
         turbo_time = 0
         active_turbo = False
-        noBalance = False
 
-        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
-        scraper.headers = headers
-        http_client = scraper
-        if proxy:
-            await self.check_proxy(http_client=http_client, proxy=proxy)
+        http_client = cloudscraper.create_scraper()
+        http_client.headers = headers
+
+        await self.proxy_function(proxy=proxy)
+        proxy_info = self.tg_client.proxy
+
+        logger.debug(f'{self.session_name} | как выглядит массив - {proxy_info}')
+
+        if proxy_info:
+            proxy_info['scheme'] = 'http' if proxy_info['scheme'] == 'https' else proxy_info['scheme']
+
+            proxy_auth = f"{proxy_info['username']}:{proxy_info['password']}@" if proxy_info['username'] and proxy_info[
+                'password'] else ""
+            proxy_str = f"{proxy_info['scheme']}://{proxy_auth}{proxy_info['hostname']}:{proxy_info['port']}"
+
+            logger.debug(f'{self.session_name} | какую строку принимает байпассер - {proxy_str}')
+
+            http_client.proxies = {'http': proxy_str, 'https': proxy_str}
+
+            await self.check_proxy(http_client=http_client)
+
 
         while True:
             noBalance = False
