@@ -186,7 +186,7 @@ class Tapper:
     async def get_access_token(self, http_client, tg_web_data: dict[str]):
         try:
             response = http_client.post(url=self.GRAPHQL_URL, json=tg_web_data)
-            logger.debug(f"get_access_token | {self.session_name}| {response}")
+            #logger.debug(f"get_access_token | {self.session_name}| {response}")
             response.raise_for_status()
 
             response_json = response.json()
@@ -208,7 +208,7 @@ class Tapper:
             }
 
             response = http_client.post(url=self.GRAPHQL_URL, json=json_data)
-            logger.debug({self.session_name} | {response})
+            #logger.debug({self.session_name} | {response})
             response.raise_for_status()
 
             response_json = response.json()
@@ -221,7 +221,7 @@ class Tapper:
 
             return profile_data
         except Exception as error:
-            logger.debug(f"get_profile_data | {self.session_name} | {error}")
+            #logger.debug(f"get_profile_data | {self.session_name} | {error}")
             logger.error(f"{self.session_name} | ❗️Unknown error while getting Profile Data: {error}")
             await asyncio.sleep(delay=9)
 
@@ -242,7 +242,7 @@ class Tapper:
 
             return user_data
         except Exception as error:
-            logger.debug(f"get_user_data | {self.session_name} | {error}")
+            #logger.debug(f"get_user_data | {self.session_name} | {error}")
             logger.error(f"{self.session_name} | ❗️Unknown error while getting User Data: {error}")
             await asyncio.sleep(delay=9)
 
@@ -502,7 +502,7 @@ class Tapper:
         await self.proxy_function(proxy=proxy)
         proxy_info = self.tg_client.proxy
 
-        logger.debug(f'{self.session_name} | как выглядит массив - {proxy_info}')
+        #logger.debug(f'{self.session_name} | как выглядит массив - {proxy_info}')
 
         if proxy_info:
             proxy_info['scheme'] = 'http' if proxy_info['scheme'] == 'https' else proxy_info['scheme']
@@ -511,7 +511,7 @@ class Tapper:
                 'password'] else ""
             proxy_str = f"{proxy_info['scheme']}://{proxy_auth}{proxy_info['hostname']}:{proxy_info['port']}"
 
-            logger.debug(f'{self.session_name} | какую строку принимает байпассер - {proxy_str}')
+            #logger.debug(f'{self.session_name} | какую строку принимает байпассер - {proxy_str}')
 
             http_client.proxies = {'http': proxy_str, 'https': proxy_str}
 
@@ -697,7 +697,7 @@ class Tapper:
                         f"Balance: <c>{balance}</c> (<g>+{calc_taps} 😊</g>) | "
                         f"Boss health: <e>{boss_current_health}</e>")
                 else:
-                    logger.info(f"{self.session_name} | 🚫 Failed tapped! 🔨 | "
+                    logger.info(f"{self.session_name} | ❌ Failed tapped! 🔨 | "
                                 f"Balance: <c>{balance}</c> (<g>No coin added 😥</g>) | 👉 Current energy: {available_energy} | ⚡️ Minimum energy limit: {settings.MIN_AVAILABLE_ENERGY} |"
                                 f"Boss health: <e>{boss_current_health}</e>")
                     logger.info(f"{self.session_name} | 😴 Sleep 10m")
@@ -761,7 +761,7 @@ class Tapper:
 
                                 await asyncio.sleep(delay=1)
                         else:
-                            logger.debug(f"{self.session_name} | Need more gold for upgrade tap to {next_tap_level} lvl ({balance}/{need_balance})")
+                            logger.info(f"{self.session_name} | Need more gold for upgrade tap to {next_tap_level} lvl ({balance}/{need_balance})")
 
                     if settings.AUTO_UPGRADE_ENERGY is True and next_energy_level <= settings.MAX_ENERGY_LEVEL:
                         # status = await self.upgrade_boost(http_client=http_client,
