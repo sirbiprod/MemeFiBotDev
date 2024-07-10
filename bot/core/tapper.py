@@ -490,7 +490,7 @@ class Tapper:
         await self.proxy_function(proxy=proxy)
         proxy_info = self.tg_client.proxy
 
-        logger.debug(f'{self.session_name} | как выглядит массив - {proxy_info}')
+        #logger.debug(f'{self.session_name} | как выглядит массив - {proxy_info}')
 
         if proxy_info:
             proxy_info['scheme'] = 'http' if proxy_info['scheme'] == 'https' else proxy_info['scheme']
@@ -499,7 +499,7 @@ class Tapper:
                 'password'] else ""
             proxy_str = f"{proxy_info['scheme']}://{proxy_auth}{proxy_info['hostname']}:{proxy_info['port']}"
 
-            logger.debug(f'{self.session_name} | какую строку принимает байпассер - {proxy_str}')
+            #logger.debug(f'{self.session_name} | какую строку принимает байпассер - {proxy_str}')
 
             http_client.proxies = {'http': proxy_str, 'https': proxy_str}
 
