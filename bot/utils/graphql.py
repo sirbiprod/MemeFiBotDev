@@ -16,12 +16,30 @@ class Query(str, Enum):
     ClanMy = "fragment FragmentClanProfile on ClanProfileOutput {\n id\n clanDetails {\n id\n name\n rarity\n username\n avatarImageUrl\n coinsAmount\n createdAt\n description\n membersCount\n __typename\n }\n clanOwner {\n id\n userId\n username\n avatarImageUrl\n coinsAmount\n currentBossLevel\n firstName\n lastName\n isClanOwner\n isMe\n __typename\n }\n __typename\n}\n\nquery ClanMy {\n clanMy {\n ...FragmentClanProfile\n __typename\n }\n}"
     Leave = "mutation Mutation {\n  clanActionLeaveClan\n}"
     Join = "mutation ClanActionJoinClan($clanId: String!) {\n clanActionJoinClan(clanId: $clanId)\n}"
+    
     #сейчас не используются
-
     #TelegramMemefiWalletConfig = "query TelegramMemefiWalletConfig {\n telegramMemefiWalletConfig {\n rpcUrls\n memefiContractAddress\n listingDate\n __typename\n }\n}"
     #TelegramMemefiWallet = "query TelegramMemefiWallet {\n telegramMemefiWallet {\n walletAddress\n dropMemefiAmountWei\n signedTransaction {\n contractAddress\n functionName\n contractType\n deadline\n nativeTokenValue\n chainId\n execTransactionValuesStringified\n __typename\n }\n __typename\n }\n}"
     #PaymentsTokens = "query PaymentsTokens {\n paymentsTokens {\n paymentToken\n tokenAddress\n toUsdRate\n __typename\n }\n}"
     
+    #getSocialTask = "query getSocialTask {\n telegramStorySocialTaskLastTask {\n id\n status\n createdAt\n token\n nextCreateAvailableAt\n __typename\n }\n}"
+    #GetCampaignsList = "fragment FragmentCampaign on CampaignOutput {\n id\n type\n status\n backgroundImageUrl\n campaignUserParticipationId\n completedTotalTasksAmount\n description\n endDate\n iconUrl\n isStarted\n name\n totalRewardsPool\n totalTasksAmount\n collectedRewardsAmount\n penaltyAmount\n __typename\n}\n\nquery GetCampaignsList($isArchive: Boolean!) {\n campaigns(isArchive: $isArchive) {\n ...FragmentCampaign\n __typename\n }\n}"
+    
+    #GetCampaignById = "fragment FragmentCampaign on CampaignOutput {\n id\n type\n status\n backgroundImageUrl\n campaignUserParticipationId\n completedTotalTasksAmount\n description\n endDate\n iconUrl\n isStarted\n name\n totalRewardsPool\n totalTasksAmount\n collectedRewardsAmount\n penaltyAmount\n __typename\n}\n\nquery GetCampaignById($campaignId: String!) {\n campaignGetById(campaignId: $campaignId) {\n ...FragmentCampaign\n __typename\n }\n}"
+    #campaignId "232ee1cf-05a4-49e1-86c1-d5a4d0adf457" - id кампании из ответа GetCampaignsList
+
+    #GetTasksList = "fragment FragmentCampaignTask on CampaignTaskOutput {\n id\n name\n description\n status\n type\n position\n buttonText\n coinsRewardAmount\n link\n userTaskId\n isRequired\n iconUrl\n __typename\n}\n\nquery GetTasksList($campaignId: String!) {\n campaignTasks(campaignConfigId: $campaignId) {\n ...FragmentCampaignTask\n __typename\n }\n}"
+    #campaignId "232ee1cf-05a4-49e1-86c1-d5a4d0adf457" - id кампании из ответа GetCampaignsList
+    
+    #GetTaskById = "fragment FragmentCampaignTask on CampaignTaskOutput {\n id\n name\n description\n status\n type\n position\n buttonText\n coinsRewardAmount\n link\n userTaskId\n isRequired\n iconUrl\n __typename\n}\n\nquery GetTaskById($taskId: String!) {\n campaignTaskGetConfig(taskId: $taskId) {\n ...FragmentCampaignTask\n __typename\n }\n}"
+    #taskId  "5c452d57-c824-4940-aaf1-5baa5de08c7b" - id задания из ответа getSocialTask
+
+    #CampaignTaskToVerification = "fragment FragmentCampaignTask on CampaignTaskOutput {\n id\n name\n description\n status\n type\n position\n buttonText\n coinsRewardAmount\n link\n userTaskId\n isRequired\n iconUrl\n __typename\n}\n\nmutation CampaignTaskToVerification($taskConfigId: String!) {\n campaignTaskMoveToVerificationV2(taskConfigId: $taskConfigId) {\n ...FragmentCampaignTask\n __typename\n }\n}"
+    #taskConfigId    "5c452d57-c824-4940-aaf1-5baa5de08c7b" - id задания из ответа getSocialTask 
+
+    #CampaignTaskCompleted = "fragment FragmentCampaignTask on CampaignTaskOutput {\n id\n name\n description\n status\n type\n position\n buttonText\n coinsRewardAmount\n link\n userTaskId\n isRequired\n iconUrl\n __typename\n}\n\nmutation CampaignTaskCompleted($userTaskId: String!) {\n campaignTaskMarkAsCompleted(userTaskId: $userTaskId) {\n ...FragmentCampaignTask\n __typename\n }\n}"
+    #userTaskId "3ed024bb-09ce-42a6-ada8-3903948365eb" - id задания из ответа GetTasksList
+
 
     #clanProfile = "fragment FragmentClanProfile on ClanProfileOutput {\n id\n clanDetails {\n id\n name\n rarity\n username\n avatarImageUrl\n coinsAmount\n createdAt\n description\n membersCount\n __typename\n }\n clanOwner {\n id\n userId\n username\n avatarImageUrl\n coinsAmount\n currentBossLevel\n firstName\n lastName\n isClanOwner\n isMe\n __typename\n }\n __typename\n}\n\nquery clanProfile($clanId: String!) {\n clanProfile(clanId: $clanId) {\n ...FragmentClanProfile\n __typename\n }\n}"
     #ClanMembersPaginated = "query ClanMembersPaginated($clanId: String!, $pagination: PaginationInput!) {\n clanMembersPaginated(clanId: $clanId, pagination: $pagination) {\n items {\n id\n userId\n username\n firstName\n lastName\n avatarImageUrl\n coinsAmount\n currentBossLevel\n isClanOwner\n isMe\n __typename\n }\n meta {\n currentPage\n itemCount\n itemsPerPage\n totalItems\n totalPages\n __typename\n }\n __typename\n }\n}"
